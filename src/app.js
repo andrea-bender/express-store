@@ -3,7 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
-const uuid = require('uuid/ve');
+const uuid = require('uuid/v4');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
@@ -122,10 +122,22 @@ app.post('/user', (req, res) =>{
   }
 });
 
-app.delete('/user/userId', (req, res) =>{
+app.delete('/user/:userId', (req, res) =>{
   const { userId }= req.params;
-  console.log(userId);
-  res.send('Got it.');
+  const index = users.findIndex(u => u.id === userId);
+
+  // make sure we actually find a user with that id
+  if (index === -1) {
+    return res
+      .status(404)
+      .send('User not found');
+  }
+  
+  users.splice(index, 1);
+  //204 no content
+  res
+    .status(204)
+    .end();
 });
 
 app.use(function errorHandler(error, req, res, next) {
